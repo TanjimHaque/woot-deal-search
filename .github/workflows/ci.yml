@@ -1,0 +1,27 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax check
+        run: |
+          node --check woot-search-extension/lib.js
+          node --check woot-search-extension/background.js
+          node --check woot-search-extension/content.js
+      - name: Validate manifest
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('woot-search-extension/manifest.json','utf8')); console.log('manifest ok')"
+      - name: Unit tests
+        run: node tests/lib.test.cjs
