@@ -75,9 +75,11 @@ and no credentials are stored by this extension.
 ## Privacy
 
 - No analytics, accounts, tracking, or remote code.
-- No browsing data leaves your browser except the search terms sent to Woot's
-  own API (the same endpoint the site itself uses).
+- The only data sent to Woot is the text you search for, and it goes to Woot's
+  own API — never to the developer.
 - Preferences live in `chrome.storage.local` and never leave the machine.
+
+Read the full [privacy policy](PRIVACY.md).
 
 ## Project layout
 
@@ -95,8 +97,15 @@ tests/
 tools/
   make_icons.py           regenerates the PNG icons
   package.sh              builds the release zip
+  package-store.sh        builds the Chrome Web Store zip (manifest at root)
+store-assets/
+  icon-128.png            store icon (96px artwork + 16px padding)
+  screenshot-1280x800.png store screenshot
+  promo-440x280.png       optional small promo tile
 artifacts/
   woot-search-e2e.png     screenshot used above
+PRIVACY.md                privacy policy for the store listing
+STORE_LISTING.md          copy, permissions, and checklist for the Chrome Web Store
 ```
 
 ## Development
@@ -117,11 +126,19 @@ BROWSER_PATH=/usr/bin/google-chrome node tests/e2e.mjs
 # Rebuild icons, or package the extension for a release
 python3 tools/make_icons.py
 tools/package.sh
+tools/package-store.sh
 ```
 
 The end-to-end test writes a fresh screenshot to
 `artifacts/woot-search-e2e.png`. It requires live network access, so CI runs the
 unit and syntax checks only (see `.github/workflows/ci.yml`).
+
+## Releasing
+
+- **GitHub:** run `tools/package.sh` and attach the ZIP to a release.
+- **Chrome Web Store:** run `tools/package-store.sh` and follow
+  [STORE_LISTING.md](STORE_LISTING.md) for the listing copy, permissions, and
+  submission checklist.
 
 ## Contributing
 

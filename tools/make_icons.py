@@ -11,8 +11,9 @@ import struct
 import zlib
 
 SIZE = 768
-OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                       "woot-search-extension", "icons")
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT_DIR = os.path.join(ROOT, "woot-search-extension", "icons")
+STORE_DIR = os.path.join(ROOT, "store-assets")
 TARGET_SIZES = (128, 48, 32, 16)
 
 BG = (18, 18, 18)
@@ -94,15 +95,15 @@ def downsample(src, src_w, dst_w):
     return dst
 
 
-def write_png(path, size, rgba):
-    raw = b"".join(b"\x00" + bytes(rgba[y * size * 4:(y + 1) * size * 4]) for y in range(size))
+def write_png(path, width, height, rgba):
+    raw = b"".join(b"\x00" + bytes(rgba[y * width * 4:(y + 1) * width * 4]) for y in range(height))
     compressed = zlib.compress(raw, 9)
 
     def chunk(kind, data):
         return (struct.pack(">I", len(data)) + kind + data +
                 struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF))
 
-    header = struct.pack(">IIBBBBB", size, size, 8, 6, 0, 0, 0)
+    header = struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
     with open(path, "wb") as fh:
         fh.write(b"\x89PNG\r\n\x1a\n")
         fh.write(chunk(b"IHDR", header))
@@ -110,14 +111,70 @@ def write_png(path, size, rgba):
         fh.write(chunk(b"IEND", b""))
 
 
+def place(canvas, canvas_w, art, art_w, x, y):
+    for row in range(art_w):
+        src = art[row * art_w * 4:(row + 1) * art_w * 4]
+        dst = ((y + row) * canvas_w + x) * 4
+        canvas[dst:dst + art_w * 4] = src
+
+
+def place_over(canvas, canvas_w, art, art_w, x, y):
+    """Alpha-composite artwork onto an opaque canvas (used for promo tiles)."""
+    for row in range(art_w):
+        for col in range(art_w):
+            si = (row * art_w + col) * 4
+            di = ((y + row) * canvas_w + (x + col)) * 4
+            alpha = art[si + 3]
+            if alpha == 0:
+                continue
+            if alpha == 255:
+                canvas[di:di + 4] = art[si:si + 4]
+                continue
+            keep = 255 - alpha
+            canvas[di] = (art[si] * alpha + canvas[di] * keep) // 255
+            canvas[di + 1] = (art[si + 1] * alpha + canvas[di + 1] * keep) // 255
+            canvas[di + 2] = (art[si + 2] * alpha + canvas[di + 2] * keep) // 255
+            canvas[di + 3] = 255
+
+
+def make_store_icon(master):
+    """128x128 store icon: 96x96 artwork with 16px transparent padding."""
+    canvas = bytearray(128 * 128 * 4)
+    place(canvas, 128, downsample(master, SIZE, 96), 96, 16, 16)
+    return canvas
+
+
+def make_promo(master):
+    """Optional 440x280 small promo tile: Woot green field with the mark."""
+    width, height = 440, 280
+    canvas = bytearray(width * height * 4)
+    for i in range(0, len(canvas), 4):
+        canvas[i] = 88
+        canvas[i + 1] = 205
+        canvas[i + 2] = 93
+        canvas[i + 3] = 255
+    art = downsample(master, SIZE, 192)
+    place_over(canvas, width, art, 192, (width - 192) // 2, (height - 192) // 2)
+    return canvas
+
+
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
+    os.makedirs(STORE_DIR, exist_ok=True)
     master = draw()
     for target in TARGET_SIZES:
         scaled = downsample(master, SIZE, target)
         path = os.path.join(OUT_DIR, "icon%d.png" % target)
-        write_png(path, target, scaled)
+        write_png(path, target, target, scaled)
         print("wrote", path)
+
+    store_icon = os.path.join(STORE_DIR, "icon-128.png")
+    write_png(store_icon, 128, 128, make_store_icon(master))
+    print("wrote", store_icon)
+
+    promo = os.path.join(STORE_DIR, "promo-440x280.png")
+    write_png(promo, 440, 280, make_promo(master))
+    print("wrote", promo)
 
 
 if __name__ == "__main__":

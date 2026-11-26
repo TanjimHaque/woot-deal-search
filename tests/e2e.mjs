@@ -17,7 +17,11 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const EXTENSION_DIR = path.join(ROOT, "woot-search-extension");
 const ARTIFACT_DIR = path.join(ROOT, "artifacts");
-const SHOT_PATH = path.join(ARTIFACT_DIR, "woot-search-e2e.png");
+const SHOT_PATH = process.env.E2E_SHOT
+  ? path.resolve(ROOT, process.env.E2E_SHOT)
+  : path.join(ARTIFACT_DIR, "woot-search-e2e.png");
+const VIEWPORT_WIDTH = Number.parseInt(process.env.E2E_WIDTH, 10) || 1440;
+const VIEWPORT_HEIGHT = Number.parseInt(process.env.E2E_HEIGHT, 10) || 1000;
 
 const BRAVE = "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser";
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
@@ -118,7 +122,7 @@ async function main() {
   if (!fs.existsSync(path.join(EXTENSION_DIR, "manifest.json"))) {
     throw new Error("Extension not found at " + EXTENSION_DIR);
   }
-  fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
+  fs.mkdirSync(path.dirname(SHOT_PATH), { recursive: true });
 
   const browser = findBrowser();
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "wootss-e2e-"));
@@ -133,7 +137,7 @@ async function main() {
     `--load-extension=${EXTENSION_DIR}`,
     `--disable-extensions-except=${EXTENSION_DIR}`,
     `--remote-debugging-port=${port}`,
-    "--window-size=1440,1000",
+    "--window-size=" + VIEWPORT_WIDTH + "," + VIEWPORT_HEIGHT,
     "about:blank"
   ];
 
@@ -188,7 +192,7 @@ async function main() {
     await cdp.send("Network.enable", {}, page);
     await cdp.send(
       "Emulation.setDeviceMetricsOverride",
-      { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false },
+      { width: VIEWPORT_WIDTH, height: VIEWPORT_HEIGHT, deviceScaleFactor: 1, mobile: false },
       page
     );
 
