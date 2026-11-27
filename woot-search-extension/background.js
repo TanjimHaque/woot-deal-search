@@ -1,10 +1,11 @@
 /*
  * Woot Deal Search - service worker.
  *
- * Owns every request to Woot's public GraphQL endpoint so content scripts
- * never have to deal with CORS or the page's CSP. The endpoint/key are the
- * same ones Woot's own frontend loads from window.__WOOT_GQL__; we learn them
- * from the content script when possible and can rediscover them if they rotate.
+ * Owns every request to Woot's public GraphQL endpoint so content scripts and
+ * the toolbar popup never have to deal with CORS or the page's CSP. The
+ * endpoint/key are the same ones Woot's own frontend loads from
+ * window.__WOOT_GQL__; we learn them from the content script when possible and
+ * can rediscover them if they rotate.
  */
 importScripts("lib.js");
 
@@ -14,20 +15,14 @@ const DEFAULT_GQL_URL = "https://d24qg5zsx8xdc4.cloudfront.net/graphql";
 const DEFAULT_GQL_KEY = "da2-gdf6f2cxpnb3xikqgzzhfhovem";
 
 const CACHE_TTL_MS = 3 * 60 * 1000;
-const CACHE_MAX_ENTRIES = 40;
+const CACHE_MAX_ENTRIES = 60;
 const DEFAULT_LIMIT = 24;
 const MAX_LIMIT = 50;
 const MAX_SKIP = 1000;
 const MAX_QUERY_LENGTH = 100;
 const REQUEST_TIMEOUT_MS = 12000;
 
-const SORT_VALUES = new Set([
-  "",
-  "DiscountPercentage",
-  "PriceLowToHigh",
-  "PriceHighToLow",
-  "NewestFirst"
-]);
+const SORT_VALUES = new Set(LIB.SORTS);
 
 const SEARCH_QUERY = `query WootSearch($filter: OfferFilterInput, $sort: OfferSortInput, $limit: Int, $skip: Int) {
   searchOffers(Filter: $filter, Sort: $sort, Limit: $limit, Skip: $skip) {
@@ -41,6 +36,9 @@ const SEARCH_QUERY = `query WootSearch($filter: OfferFilterInput, $sort: OfferSo
       EndDate
       IsFeatured
       IsWootOff
+      IsRefurbished
+      IsFactoryReconditioned
+      IsAmazonCertifiedRefurbished
       Site {
         Hostname
         MarketingName
@@ -51,9 +49,18 @@ const SEARCH_QUERY = `query WootSearch($filter: OfferFilterInput, $sort: OfferSo
         Height
       }
       Items {
+        Asin
         SalePrice
         ListPrice
         SoldOut
+        Attributes {
+          Key
+          Value
+        }
+        AmazonReviewSummary {
+          AverageOverallRating
+          TotalReviewCount
+        }
       }
     }
   }
@@ -119,13 +126,10 @@ async function discoverConfig() {
     throw new SearchError("config", "Couldn't refresh the Woot API configuration.");
   }
   const html = await res.text();
-  const match = html.match(
-    /__WOOT_GQL__\s*=\s*\{\s*url:\s*"([^"]+)"\s*,\s*apiKey:\s*"([^"]+)"\s*\}/
-  );
-  if (!match) {
+  const cfg = LIB.extractGqlConfig(html);
+  if (!cfg) {
     throw new SearchError("config", "Woot's API configuration could not be found.");
   }
-  const cfg = { url: match[1], apiKey: match[2] };
   if (!isValidConfig(cfg)) {
     throw new SearchError("config", "Woot returned an unsupported API configuration.");
   }
@@ -174,14 +178,30 @@ function normalizeInput(params) {
   }
 
   const sort = SORT_VALUES.has(params.sort) ? params.sort : "";
+  const category = LIB.isValidCategory(params.category) ? params.category : "";
+  const minPrice = LIB.parsePriceBound(params.minPrice);
+  const maxPrice = LIB.parsePriceBound(params.maxPrice);
+  const priceFilter = LIB.buildPriceFilter(minPrice, maxPrice);
   const limit = clampInt(params.limit, DEFAULT_LIMIT, 1, MAX_LIMIT);
   const skip = clampInt(params.skip, 0, 0, MAX_SKIP);
   const hideSoldOut = params.hideSoldOut !== false;
 
   const filter = { Keyword: query };
   if (hideSoldOut) filter.IsSoldOut = { exclude: true };
+  if (category) filter.Categories = [category];
+  if (priceFilter) filter.PriceFilterInputs = priceFilter;
 
-  return { query, sort, limit, skip, hideSoldOut, filter };
+  return {
+    query,
+    sort,
+    category,
+    minPrice: priceFilter ? priceFilter[0].between[0] : "",
+    maxPrice: priceFilter ? priceFilter[0].between[1] : "",
+    limit,
+    skip,
+    hideSoldOut,
+    filter
+  };
 }
 
 async function requestSearch(variables, retried) {
@@ -245,10 +265,14 @@ async function requestSearch(variables, retried) {
   }
 
   const normalized = LIB.normalizeSearchResponse(raw);
+  const nextSkip = variables.skip + normalized.offers.length;
   return {
     totalHits: normalized.totalHits,
     offers: normalized.offers,
-    hasMore: variables.skip + normalized.offers.length < normalized.totalHits
+    hasMore:
+      normalized.offers.length > 0 &&
+      nextSkip < normalized.totalHits &&
+      nextSkip <= MAX_SKIP
   };
 }
 
@@ -264,6 +288,9 @@ async function search(params) {
   const cacheKey = [
     input.query,
     input.sort,
+    input.category,
+    input.minPrice,
+    input.maxPrice,
     input.hideSoldOut ? "1" : "0",
     input.skip,
     input.limit
@@ -330,17 +357,4 @@ chrome.runtime.onInstalled.addListener(() => {
     }
   });
   getConfig(false).catch(() => {});
-});
-
-chrome.action.onClicked.addListener((tab) => {
-  if (!tab || typeof tab.id !== "number") return;
-  chrome.tabs.sendMessage(tab.id, { type: "FOCUS_SEARCH" }, () => {
-    if (!chrome.runtime.lastError) return;
-    const openWoot = () =>
-      chrome.storage.session
-        .set({ focusSearchOnLoad: true })
-        .catch(() => {})
-        .finally(() => chrome.tabs.create({ url: "https://www.woot.com/" }));
-    openWoot();
-  });
 });

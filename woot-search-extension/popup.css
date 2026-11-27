@@ -1,0 +1,65 @@
+/* Woot Deal Search - toolbar popup layout overrides. */
+
+html,
+body {
+  width: 540px;
+  height: 580px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+#wootss-popup-mount {
+  width: 100%;
+  height: 100%;
+}
+
+#wootss-root.wootss-mode-popup {
+  height: 100%;
+  padding: 0;
+}
+
+#wootss-root.wootss-mode-popup .wootss-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 10px 12px 0;
+}
+
+#wootss-root.wootss-mode-popup .wootss-bar {
+  height: 44px;
+  flex: 0 0 auto;
+}
+
+#wootss-root.wootss-mode-popup .wootss-panel {
+  position: static;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  margin-top: 8px;
+  margin-left: -12px;
+  margin-right: -12px;
+  border: 0;
+  border-top: 1px solid #e7e9e9;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#wootss-root.wootss-mode-popup .wootss-panel-head {
+  padding: 8px 12px;
+}
+
+#wootss-root.wootss-mode-popup .wootss-results {
+  padding: 6px 8px;
+}
+
+#wootss-root.wootss-mode-popup .wootss-foot {
+  padding: 8px 12px;
+}
+
+#wootss-root.wootss-mode-popup .wootss-result-actions {
+  flex-direction: column;
+  gap: 4px;
+}

@@ -1,6 +1,6 @@
 # Chrome Web Store submission pack
 
-Everything needed to publish **Woot Deal Search 1.0.0**. Copy the fields below
+Everything needed to publish **Woot Deal Search 2.0.0**. Copy the fields below
 into the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
 
 Official references:
@@ -32,11 +32,11 @@ Do not upload the GitHub release ZIP — it wraps everything in a folder.
 tools/package-store.sh
 ```
 
-This produces `dist/woot-deal-search-1.0.0-chrome-store.zip` and prints its
+This produces `dist/woot-deal-search-2.0.0-chrome-store.zip` and prints its
 contents. Confirm `manifest.json` appears at the top level:
 
 ```bash
-unzip -l dist/woot-deal-search-1.0.0-chrome-store.zip | head
+unzip -l dist/woot-deal-search-2.0.0-chrome-store.zip | head
 ```
 
 ## 3. Store listing fields
@@ -44,7 +44,7 @@ unzip -l dist/woot-deal-search-1.0.0-chrome-store.zip | head
 | Field | Value |
 | --- | --- |
 | Item name | `Woot Deal Search` (from the manifest) |
-| Summary | `Search every live Woot deal from any Woot page. Adds the search box Woot forgot.` |
+| Summary | `Search every live Woot deal from any Woot page or the browser toolbar, with filters, Amazon ratings, and price history links.` |
 | Category | **Shopping** |
 | Language | **English (United States)** |
 | Homepage URL | `https://github.com/TanjimHaque/woot-deal-search` |
@@ -57,22 +57,23 @@ unzip -l dist/woot-deal-search-1.0.0-chrome-store.zip | head
 ```
 Woot Deal Search adds the search box Woot doesn't have.
 
-Woot is an Amazon-owned deals site with thousands of live offers, but no way to search them. This extension adds a search bar under Woot's header on every Woot page and searches every live deal at once.
+Woot is an Amazon-owned deals site with thousands of live offers, but no way to search them. This extension adds a search bar under Woot's header on every Woot page — plus a browser toolbar popup so you can search every live deal from any tab.
 
 FEATURES
-• Search all ~15,000 live Woot deals from any Woot page.
-• See a thumbnail, sale price, original price, and discount.
-• Sort by best match, biggest discount, price, or newest.
+• Search all ~15,000 live Woot deals from any Woot page or the browser toolbar popup.
+• Filter by category (Electronics, Computers, Home & Kitchen, Tools & Garden, Sports & Outdoors, Shirt, Grocery & Household, Gourmet, Clearance) and Min/Max price.
+• Sort by best match, best selling, biggest discount, price, or newest.
+• See thumbnails, accurate in-stock pricing, discounts, Amazon star ratings & review counts, condition (New, Refurbished, Factory Reconditioned), and category/Woot-Off/ending-soon badges.
+• Jump straight to Amazon or CamelCamelCamel price history via quick ASIN links.
 • Hide sold-out deals with one click, or show them again.
-• Keyboard shortcuts: Cmd/Ctrl+K to focus, arrow keys to move, Enter to open, Esc to close.
+• Keyboard shortcuts: Cmd/Ctrl+K to focus, arrow keys to move, Enter to open, Cmd/Ctrl+Enter to open in a new tab, Esc to close.
 • Remembers your sort and sold-out preferences.
-• Works on the home page, category pages, offer pages, and Woot subdomains.
 
 HOW TO USE
-Open woot.com, click the search bar under the header, and type what you're looking for. Results update as you type. Click a result to open it on Woot.
+Open woot.com and type in the search bar under the header, or click the Woot Deal Search toolbar icon from any tab. Results update as you type. Click a result to open it on Woot.
 
 PRIVACY
-No accounts, analytics, ads, or tracking. Search terms are sent directly from your browser to Woot's public API to retrieve results; they are not sent to the developer. Preferences stay in your browser. Full policy: https://github.com/TanjimHaque/woot-deal-search/blob/main/PRIVACY.md
+No accounts, analytics, ads, search history, or tracking. Search terms and filters are sent directly from your browser to Woot's public API to retrieve results; they are not sent to the developer. Sort and sold-out preferences stay in your browser. Full policy: https://github.com/TanjimHaque/woot-deal-search/blob/main/PRIVACY.md
 
 UNOFFICIAL
 This is an unofficial extension. It is not affiliated with, endorsed by, or produced by Woot or Amazon. Woot and Amazon are trademarks of their respective owners.
@@ -96,13 +97,13 @@ screenshot in sync if the UI changes.
 ### Single purpose
 
 ```
-Woot Deal Search adds a search bar to Woot pages and lets the user search Woot's live deals, then open the selected deal.
+Woot Deal Search adds a search bar to Woot pages and a browser toolbar popup so the user can search and filter Woot's live deals, then open the selected deal.
 ```
 
 ### Permission justifications
 
 - **`storage`**: Stores the user's sort order and "hide sold out" preference
-  locally so the UI remembers them. No personal data is stored.
+  locally so the UI remembers them. No personal data or search history is stored.
 - **`https://*.woot.com/*`**: Injects the search bar into Woot pages and reads
   the public `window.__WOOT_GQL__` API configuration embedded in those pages.
 - **`https://d24qg5zsx8xdc4.cloudfront.net/*`**: Calls Woot's own public GraphQL
@@ -118,7 +119,7 @@ packaged in the ZIP. The API returns JSON data, not executable code.
 Declare **User activity** for the search text the user types. Explain:
 
 ```
-The search query is transmitted over HTTPS from the user's browser directly to Woot's public API to return matching deals. The developer never receives, stores, or logs it. Sort and "hide sold out" preferences are stored locally in chrome.storage.local and never transmitted. No other user data is collected.
+The search query and selected filters are transmitted over HTTPS from the user's browser directly to Woot's public API to return matching deals. The developer never receives, stores, or logs them, and the extension does not store search history. Sort and "hide sold out" preferences are stored locally in chrome.storage.local and never transmitted. No other user data is collected.
 ```
 
 Do not select categories the extension does not handle: personally identifiable
@@ -159,11 +160,12 @@ No login or credentials are required.
 
 1. Install the extension.
 2. Open https://www.woot.com/ (close any Woot newsletter/promo overlay if it appears).
-3. Click the search field under the green Woot header.
-4. Type "usb" and wait a moment.
-5. Confirm that results appear with images, prices, and discounts.
+3. Click the search field under the green Woot header, type "usb", and wait a moment.
+4. Confirm results appear with images, prices, discounts, Amazon ratings, condition/category badges, and Amazon/CCC links.
+5. Try filtering by Category (e.g., Electronics) or Max price (e.g., 25) and sorting by Best selling or Price.
 6. Click a result; it should open the matching Woot offer page.
-7. The same search bar appears on https://www.woot.com/category/electronics and on offer pages.
+7. Click the extension toolbar icon from any tab and type "airpods" to confirm the toolbar popup searches live deals and opens results in a new tab.
+8. The in-page search bar also appears on https://www.woot.com/category/electronics (with a quick "Only Electronics" filter button) and on offer pages.
 ```
 
 ## 7. Submit and review
