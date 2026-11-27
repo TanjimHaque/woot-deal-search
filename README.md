@@ -1,8 +1,8 @@
 # Woot Deal Search
 
 An unofficial Chrome extension that adds the search box Woot forgot. It puts a
-search bar under Woot's header on every Woot page and searches **all live deals
-across the site**, not just the page you're on.
+search bar under Woot's header on every Woot page — and adds a browser toolbar
+popup so you can search **all live Woot deals from any tab**.
 
 ![Woot Deal Search in action](artifacts/woot-search-e2e.png)
 
@@ -11,16 +11,26 @@ across the site**, not just the page you're on.
 
 ## Features
 
-- Search roughly 15,000 live Woot offers as you type.
-- See a thumbnail, sale price, original price, and discount for every result.
-- Sort by best match, biggest discount, price, or newest.
+- Search roughly 15,000 live Woot offers as you type from any Woot page or from
+  the **browser toolbar popup** on any tab.
+- **Filter by category** (Electronics, Computers, Home & Kitchen, Tools & Garden,
+  Sports & Outdoors, Shirt, Grocery & Household, Gourmet, Clearance) — with a
+  one-click **"Only &lt;Category&gt;"** shortcut when browsing a Woot category page.
+- **Filter by price range** (Min / Max dollar bounds) with one-click reset.
+- **Sort** by best match, **best selling**, biggest discount, price, or newest.
+- **Rich deal cards**: thumbnail, accurate in-stock variant sale & list price,
+  discount percentage, **Amazon star rating & review count**, **condition badge**
+  (New, Refurbished, Factory Reconditioned, etc.), category/Woot-Off/ending-soon
+  pills, and highlighted search terms.
+- **Quick ASIN links**: jump straight to the matching **Amazon** listing or
+  **CamelCamelCamel** price history in a new tab (plain links — no extra network
+  requests or permissions).
 - Hide sold-out deals (on by default), or show them again.
 - Full keyboard support: `Cmd/Ctrl+K` to focus, `↑`/`↓` to move, `Enter` to
-  open, `Esc` to close.
-- Clicking the toolbar button jumps to search on a Woot tab.
-- Works on the home page, category pages, offer pages, and Woot subdomains.
-- Remembers your sort and sold-out preferences.
-- Handles empty results, timeouts, and offline errors with a retry.
+  open, `Cmd/Ctrl+Enter` to open in a new tab, `Esc` to close.
+- Smooth non-destructive refreshes and incremental **Show more** pagination with
+  inline error recovery.
+- Remembers your sort and sold-out preferences across tabs and the popup.
 
 ## Install
 
@@ -32,12 +42,13 @@ across the site**, not just the page you're on.
 3. Turn on **Developer mode** (top right).
 4. Click **Load unpacked** and select the unzipped `woot-search-extension`
    folder.
-5. Open <https://www.woot.com/> and look under the header.
+5. Open <https://www.woot.com/> and look under the header, or click the toolbar
+   icon from any tab.
 
 ### From source
 
 ```bash
-git clone https://github.com/YOUR_USER/woot-deal-search.git
+git clone https://github.com/TanjimHaque/woot-deal-search.git
 ```
 
 Then load `woot-deal-search/woot-search-extension` as an unpacked extension in
@@ -49,19 +60,23 @@ in `chrome://extensions`, then refresh the Woot tab.
 ## Usage
 
 - Type at least 2 characters, for example `usb`, `airpods`, or `coffee maker`.
-- Use the **Hide sold out** checkbox and the sort menu in the results header;
-  both choices are remembered.
+- Filter by **Category**, **Min/Max price**, or **Hide sold out**, and change
+  the **Sort** order in the panel header. Your sort and sold-out choices are
+  remembered.
 - Results show the current total for your query. Use **Show more** to load the
   next 24.
-- Clicking a result opens its Woot offer page. `Cmd/Ctrl+click` opens it in a
-  new tab.
+- Clicking a result opens its Woot offer page (`Cmd/Ctrl+click` or
+  `Cmd/Ctrl+Enter` opens it in a new tab; results in the toolbar popup always
+  open in a new tab).
+- Use the **Amazon ↗** and **CCC ↗** links on a card to check Amazon reviews or
+  CamelCamelCamel price history when an offer has an ASIN.
 
 ## How it works
 
 Woot's frontend is a React app backed by a public GraphQL endpoint configured in
 each page as `window.__WOOT_GQL__`. The extension reads that configuration from
 the page, asks its service worker to call `searchOffers`, and renders the
-normalized results in a dropdown.
+normalized results in both the in-page dropdown and the toolbar popup.
 
 The service worker owns all network requests, so the page's CSP and CORS rules
 never get in the way. Responses are cached for 3 minutes and typing is debounced
@@ -74,10 +89,13 @@ and no credentials are stored by this extension.
 
 ## Privacy
 
-- No analytics, accounts, tracking, or remote code.
-- The only data sent to Woot is the text you search for, and it goes to Woot's
-  own API — never to the developer.
-- Preferences live in `chrome.storage.local` and never leave the machine.
+- No analytics, accounts, tracking, search history storage, or remote code.
+- The only data sent to Woot is the query and filters you choose, and it goes
+  directly to Woot's own API — never to the developer.
+- Sort and sold-out preferences live in `chrome.storage.local` and never leave
+  the machine.
+- Amazon and CamelCamelCamel links are standard external links that only open
+  when you click them.
 
 Read the full [privacy policy](PRIVACY.md).
 
@@ -85,15 +103,19 @@ Read the full [privacy policy](PRIVACY.md).
 
 ```
 woot-search-extension/    the loadable extension (manifest at its root)
-  manifest.json           MV3 manifest
+  manifest.json           MV3 manifest (v2.0.0)
   background.js           service worker: API call, config discovery, cache
-  lib.js                  pure normalization helpers (also used by tests)
-  content.js              injects the bar, renders results, keyboard handling
-  content.css             scoped styles
+  lib.js                  pure normalization & filter helpers (used by tests)
+  search-ui.js            shared search bar, filters, and card UI controller
+  content.js              injects the in-page bar on Woot pages
+  content.css             scoped styles for the bar, filters, and cards
+  popup.html              browser toolbar search popup
+  popup.js                toolbar popup bootstrap
+  popup.css               toolbar popup layout overrides
   icons/                  generated PNGs
 tests/
-  lib.test.cjs            unit tests for price/image/URL normalization
-  e2e.mjs                 headless-browser end-to-end test + screenshot
+  lib.test.cjs            unit tests for normalization, filters, and helpers
+  e2e.mjs                 cross-platform headless-browser E2E test + screenshot
 tools/
   make_icons.py           regenerates the PNG icons
   package.sh              builds the release zip
@@ -111,16 +133,16 @@ STORE_LISTING.md          copy, permissions, and checklist for the Chrome Web St
 ## Development
 
 Requirements: Node.js 20+, Python 3 (only for regenerating icons), and a
-Chromium browser (Chrome, Brave, or Chromium) for the end-to-end test.
+Chromium browser (Chrome, Brave, Chromium, or Edge) for the end-to-end test.
 
 ```bash
 # Unit tests
 node tests/lib.test.cjs
 
-# End-to-end: loads the extension in headless Brave/Chrome and runs a real search
+# End-to-end: loads the extension in headless Chrome/Brave/Edge and runs live checks
 node tests/e2e.mjs
 
-# If the browser is not in a default macOS location:
+# Override browser binary if needed:
 BROWSER_PATH=/usr/bin/google-chrome node tests/e2e.mjs
 
 # Rebuild icons, or package the extension for a release

@@ -11,14 +11,20 @@
   --wootss-line: #d5d9d9;
   --wootss-soft: #f0f2f2;
   --wootss-wash: #f7f8f8;
+  --wootss-green: #067d62;
+  --wootss-green-bg: #e7f6e8;
+  --wootss-amber: #8a4b00;
+  --wootss-amber-bg: #fff4e0;
+  --wootss-red: #b12704;
+  --wootss-red-bg: #fdecec;
   position: relative;
   z-index: 1000;
   display: block;
   width: 100%;
-  padding: 14px 0 40px;
+  padding: 14px 16px 24px;
   margin: 0;
   color: var(--wootss-ink);
-  font-family: "Figtree Medium", Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Figtree Medium", -apple-system, BlinkMacSystemFont, Helvetica, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   line-height: 1.35;
   text-align: left;
@@ -35,13 +41,42 @@
   margin: 0 auto;
 }
 
+/* ------------------------------- popup top ------------------------------- */
+
+#wootss-root .wootss-popup-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#wootss-root .wootss-brand {
+  color: var(--wootss-ink);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+#wootss-root .wootss-open-woot {
+  color: var(--wootss-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#wootss-root .wootss-open-woot:hover {
+  color: var(--wootss-ink);
+  text-decoration: underline;
+}
+
 /* ------------------------------- search bar ------------------------------ */
 
 #wootss-root .wootss-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 52px;
+  height: 50px;
   padding: 0 14px;
   background: #ffffff;
   border: 1px solid var(--wootss-line);
@@ -80,7 +115,7 @@
   box-shadow: none !important;
   color: var(--wootss-ink);
   font-family: inherit;
-  font-size: 16px;
+  font-size: 15.5px;
   line-height: 1.2;
   -webkit-appearance: none;
   appearance: none;
@@ -146,7 +181,7 @@
   right: 0;
   display: flex;
   flex-direction: column;
-  max-height: min(70vh, 640px);
+  max-height: min(74vh, 660px);
   overflow: hidden;
   background: #ffffff;
   border: 1px solid var(--wootss-line);
@@ -157,13 +192,27 @@
 
 #wootss-root .wootss-panel-head {
   display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   padding: 10px 14px;
   background: #ffffff;
   border-bottom: 1px solid #e7e9e9;
+}
+
+#wootss-root .wootss-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#wootss-root .wootss-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 #wootss-root .wootss-count {
@@ -180,13 +229,13 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 #wootss-root .wootss-hide {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: var(--wootss-muted);
   font-size: 12.5px;
   white-space: nowrap;
@@ -202,9 +251,11 @@
   cursor: pointer;
 }
 
-#wootss-root .wootss-sort {
-  max-width: 160px;
-  padding: 4px 6px;
+#wootss-root .wootss-sort,
+#wootss-root .wootss-category {
+  max-width: 165px;
+  height: 28px;
+  padding: 0 6px;
   color: var(--wootss-ink);
   background: #ffffff;
   border: 1px solid var(--wootss-line);
@@ -212,6 +263,111 @@
   font-family: inherit;
   font-size: 12.5px;
   cursor: pointer;
+}
+
+#wootss-root .wootss-scope-btn {
+  height: 28px;
+  padding: 0 9px;
+  color: var(--wootss-green);
+  background: var(--wootss-green-bg);
+  border: 1px solid #c5e6c8;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#wootss-root .wootss-scope-btn:hover {
+  background: #d7f0d9;
+}
+
+#wootss-root .wootss-price-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 7px;
+  background: var(--wootss-wash);
+  border: 1px solid var(--wootss-line);
+  border-radius: 6px;
+}
+
+#wootss-root .wootss-price-prefix,
+#wootss-root .wootss-price-sep {
+  color: var(--wootss-muted);
+  font-size: 12px;
+  user-select: none;
+}
+
+#wootss-root .wootss-price-input {
+  width: 52px;
+  height: 22px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0 !important;
+  outline: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--wootss-ink);
+  font-family: inherit;
+  font-size: 12.5px;
+  -moz-appearance: textfield;
+}
+
+#wootss-root .wootss-price-input::-webkit-outer-spin-button,
+#wootss-root .wootss-price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#wootss-root .wootss-clear-filters {
+  margin: 0;
+  padding: 3px 7px;
+  color: var(--wootss-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#wootss-root .wootss-clear-filters:hover {
+  color: var(--wootss-ink);
+  background: var(--wootss-soft);
+}
+
+/* ----------------------------- loading bar ------------------------------- */
+
+#wootss-root .wootss-progress {
+  position: relative;
+  flex: 0 0 auto;
+  height: 2px;
+  overflow: hidden;
+  background: #eceeee;
+}
+
+#wootss-root .wootss-progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 40%;
+  background: var(--wootss-green);
+  animation: wootss-slide 1s ease-in-out infinite;
+}
+
+@keyframes wootss-slide {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 /* -------------------------------- results -------------------------------- */
@@ -222,6 +378,11 @@
   overflow-y: auto;
   padding: 6px;
   scrollbar-width: thin;
+  transition: opacity 0.14s ease;
+}
+
+#wootss-root .wootss-results.wootss-results-busy {
+  opacity: 0.58;
 }
 
 #wootss-root .wootss-results::-webkit-scrollbar {
@@ -237,12 +398,9 @@
 #wootss-root .wootss-result {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  color: inherit !important;
-  text-decoration: none !important;
+  gap: 8px;
+  padding: 6px 8px;
   border-radius: 8px;
-  cursor: pointer;
 }
 
 #wootss-root .wootss-result:hover,
@@ -250,9 +408,21 @@
   background: var(--wootss-soft);
 }
 
-#wootss-root .wootss-result:focus-visible {
+#wootss-root .wootss-result-main {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  color: inherit !important;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+#wootss-root .wootss-result-main:focus-visible {
   outline: 2px solid var(--wootss-ink);
-  outline-offset: -2px;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 #wootss-root .wootss-thumb {
@@ -287,48 +457,105 @@
   display: -webkit-box;
   overflow: hidden;
   color: var(--wootss-ink);
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
+#wootss-root .wootss-mark {
+  padding: 0 1px;
+  color: inherit;
+  background: #fff3b0;
+  border-radius: 2px;
+  font-weight: 700;
+}
+
 #wootss-root .wootss-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 7px;
+  margin-top: 3px;
 }
 
 #wootss-root .wootss-price {
   color: var(--wootss-ink);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
 }
 
 #wootss-root .wootss-list {
   color: var(--wootss-muted);
-  font-size: 12.5px;
+  font-size: 12px;
   text-decoration: line-through;
 }
 
 #wootss-root .wootss-off {
-  padding: 1px 7px;
-  color: #067d62;
-  background: #e7f6e8;
+  padding: 1px 6px;
+  color: var(--wootss-green);
+  background: var(--wootss-green-bg);
   border-radius: 999px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-#wootss-root .wootss-sold {
-  padding: 1px 7px;
-  color: #b12704;
-  background: #fdecec;
+#wootss-root .wootss-rating {
+  color: #8a5a00;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#wootss-root .wootss-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+#wootss-root .wootss-badge {
+  display: inline-block;
+  padding: 1px 6px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+#wootss-root .wootss-badge-new {
+  color: #36454f;
+  background: #edf1f2;
+}
+
+#wootss-root .wootss-badge-cond {
+  color: var(--wootss-amber);
+  background: var(--wootss-amber-bg);
+}
+
+#wootss-root .wootss-badge-cat {
+  color: var(--wootss-muted);
+  background: var(--wootss-wash);
+  border: 1px solid #e3e6e6;
+}
+
+#wootss-root .wootss-badge-wootoff {
+  color: #9a3412;
+  background: #ffedd5;
+  font-weight: 700;
+}
+
+#wootss-root .wootss-badge-ending {
+  color: var(--wootss-red);
+  background: var(--wootss-red-bg);
+}
+
+#wootss-root .wootss-sold {
+  color: var(--wootss-red);
+  background: var(--wootss-red-bg);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -340,6 +567,37 @@
 
 #wootss-root .wootss-result.wootss-soldout .wootss-title {
   color: var(--wootss-muted);
+}
+
+/* ------------------------- external ASIN actions ------------------------- */
+
+#wootss-root .wootss-result-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+}
+
+#wootss-root .wootss-ext-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  color: var(--wootss-muted) !important;
+  background: #ffffff;
+  border: 1px solid var(--wootss-line);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+
+#wootss-root .wootss-ext-link:hover {
+  color: var(--wootss-ink) !important;
+  border-color: var(--wootss-ink);
+  background: #ffffff;
 }
 
 /* -------------------------------- footer --------------------------------- */
@@ -354,6 +612,18 @@
   color: var(--wootss-muted);
   border-top: 1px solid #e7e9e9;
   font-size: 12px;
+}
+
+#wootss-root .wootss-foot-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#wootss-root .wootss-foot-err {
+  color: var(--wootss-red);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 #wootss-root .wootss-more {
@@ -482,9 +752,17 @@
   clip: rect(0 0 0 0);
 }
 
+@media (max-width: 640px) {
+  #wootss-root .wootss-result-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #wootss-root .wootss-skthumb,
-  #wootss-root .wootss-skline {
+  #wootss-root .wootss-skline,
+  #wootss-root .wootss-progress::after {
     animation: none;
   }
 }

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Woot Deal Search",
-  "version": "1.0.0",
-  "description": "Search every live Woot deal from any Woot page. Adds the search box Woot forgot.",
+  "version": "2.0.0",
+  "description": "Search every live Woot deal from any Woot page or the browser toolbar, with filters, Amazon ratings, and price history links.",
   "minimum_chrome_version": "102",
   "permissions": ["storage"],
   "host_permissions": [
@@ -15,13 +15,14 @@
   "content_scripts": [
     {
       "matches": ["https://*.woot.com/*"],
-      "js": ["lib.js", "content.js"],
+      "js": ["lib.js", "search-ui.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }
   ],
   "action": {
     "default_title": "Search Woot deals",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
